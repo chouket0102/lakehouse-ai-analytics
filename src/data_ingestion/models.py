@@ -74,7 +74,10 @@ location_schema = StructType([
         StructField("local", StringType(), True)
     ]), True),
 
-    StructField("datetimeLast", StructField("utc", StringType(), True))
+    StructField("datetimeLast", StructType([
+        StructField("utc", StringType(), True),
+        StructField("local", StringType(), True)
+    ]), True)
 ])
 
 
@@ -95,9 +98,14 @@ sensor_schema = StructType([
     StructField("coverage", StringType(), True),
     StructField("isMobile", BooleanType(), True),
     StructField("isMonitor", BooleanType(), True),
-    StructField("datetimeFirst_utc", TimestampType()),
-    StructField("datetimeLast_utc", TimestampType()),
-
+    StructField("datetimeFirst", StructType([
+        StructField("utc", StringType(), True),
+        StructField("local", StringType(), True)
+    ]), True),
+    StructField("datetimeLast", StructType([
+        StructField("utc", StringType(), True),
+        StructField("local", StringType(), True)
+    ]), True)
 ])
 
 measurements_schema = StructType([
