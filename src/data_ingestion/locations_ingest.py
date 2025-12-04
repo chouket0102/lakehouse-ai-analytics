@@ -57,7 +57,11 @@ def fetch_air_quality_locations(location_ids=LOCATION_IDS):
         url = f"{BASE_URL}/locations/{loc_id}"
         try:
             json_data = safe_get(url)
-            results = json_data.get("results", [])
+            # Replace .get() with direct access
+            if "results" in json_data:
+                results = json_data["results"]
+            else:
+                results = []
             if isinstance(results, dict):
                 results = [results]
             for r in results:

@@ -9,25 +9,31 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 spark = SparkSession.builder.getOrCreate()
 
 def _parse_measurement_result(sensor_id, r):
+    # Replace all .get() with direct access
+    parameter = r["parameter"] if "parameter" in r else {}
+    parameter_name = parameter["name"] if isinstance(parameter, dict) and "name" in parameter else None
+    parameter_units = parameter["units"] if isinstance(parameter, dict) and "units" in parameter else None
 
-    parameter = r.get("parameter") or {}
-    parameter_name = parameter.get("name") if isinstance(parameter, dict) else None
-    parameter_units = parameter.get("units") if isinstance(parameter, dict) else None
+    date = r["date"] if "date" in r else {}
+    datetime_utc = date["utc"] if "utc" in date else None
+    datetime_local = date["local"] if "local" in date else None
 
-    date = r.get("date") or {}
-    datetime_utc = date.get("utc")
-    datetime_local = date.get("local")
-
-    value = r.get("value")
+    value = r["value"] if "value" in r else None
     try:
         if value is not None:
             value = float(value)
     except Exception:
         value = None
 
+    location_id = None
+    if "locationId" in r:
+        location_id = r["locationId"]
+    elif "location_id" in r:
+        location_id = r["location_id"]
+
     return {
         "sensor_id": int(sensor_id),
-        "location_id": r.get("locationId") or r.get("location_id") or None,
+        "location_id": location_id,
         "parameter": parameter_name,
         "value": value,
         "unit": parameter_units,
@@ -52,8 +58,10 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
                 params["date_to"] = date_to
             try:
                 data = safe_get(url, params=params)
-                results = data.get("results", [])
-                if not results:
+                # Replace .get() with direct access
+                if "results" in data and data["results"]:
+                    results = data["results"]
+                else:
                     break
                 for r in results:
                     parsed = _parse_measurement_result(sensor_id, r)

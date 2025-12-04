@@ -3,13 +3,17 @@ import requests
 import json
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import col, explode, to_timestamp
+from pyspark.sql.types import StructType, StructField, IntegerType, DoubleType, StringType
 from src.data_ingestion.models import *
 from delta.tables import DeltaTable
 
 spark = SparkSession.builder.getOrCreate()
 
-OPENAQ_API_KEY = "bb3f7808b0e6125c0b8e0c8c15980baeb7c19c92f0a956d06e3caa08f7234476"
-location_ids=[2162939,2162982,2162940,2162946,2162945,2162942,2162943,2162944,2162947,2162981,2162980,2162989,2162965]
+OPENAQ_API_KEY = ""
+location_ids=[2162939,2162982,2162940,2162946,2162945,2162942,2162943,2162944,2162947,216298
+
+1,2162980,2162989,2162965]
+
 # --------------------------
 # FETCH LOCATIONS AND SAVE IN BRONZE
 # --------------------------
@@ -24,7 +28,12 @@ def fetch_air_quality_locations():
             response = requests.get(url, headers=headers)
             response.raise_for_status()
             json_data = response.json()
-            results = json_data.get("results", [])
+            
+            # Handle results - could be a list or dict
+            if "results" in json_data:
+                results = json_data["results"]
+            else:
+                results = []
             
             # If results is a dict (single object), wrap it in a list
             if isinstance(results, dict):
@@ -92,6 +101,8 @@ def fetch_air_quality_sensors():
         .collect()
     )
     sensor_ids = [row.sensor_id for row in sensor_ids]
+    
+    print(f"Found {len(sensor_ids)} unique sensor IDs to fetch.")
 
     all_sensor_rows = []
 
@@ -99,11 +110,24 @@ def fetch_air_quality_sensors():
         url = f"https://api.openaq.org/v3/sensors/{sensor}"
         headers = {"X-API-Key": OPENAQ_API_KEY}
 
-        response = requests.get(url, headers=headers)
-        response_json = response.json()
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            response_json = response.json()
+            
+            # Check if results exist and is not None
+            if response_json and "results" in response_json:
+                results = response_json["results"]
+                if results:
+                    for item in results:
+                        all_sensor_rows.append(item)
+        except Exception as e:
+            print(f"⚠ Error fetching sensor {sensor}: {e}")
+            continue
 
-        for item in response_json.get("results", []):
-            all_sensor_rows.append(item)
+    if not all_sensor_rows:
+        print("⚠ No sensor data found.")
+       return
 
     # Create DataFrame with strict schema
     df_sensors = spark.createDataFrame(all_sensor_rows, schema=sensor_schema)
@@ -133,60 +157,101 @@ def fetch_air_quality_sensors():
 # --------------------------
 # FETCH MEASUREMENTS AND SAVE IN BRONZE
 # --------------------------
-def fetch_air_quality_measurements(date_from=None, date_to=None):
-    df_sensors = spark.table("bronze.air_quality_sensors_bronze")
+# Update schema to match OpenAQ v3 API response structure
+measurements_schema_ingest = StructType([
+    StructField("sensor_id", IntegerType(), True),
+    StructField("location_id", IntegerType(), True),
+    StructField("parameter", StringType(), True),
+    StructField("value", DoubleType(), True),
+    StructField("unit", StringType(), True),
+    StructField("datetime_utc", StringType(), True),   # Extracted from period.datetimeFrom.utc
+    StructField("datetime_local", StringType(), True)  # Extracted from period.datetimeFrom.local
+])
 
-    sensor_ids = [row.id for row in df_sensors.select("id").collect()]
+def fetch_air_quality_measurements(date_from=None, date_to=None):
+    # 1. Debug: Ensure we actually have sensors to query
+    try:
+        df_sensors = spark.table("bronze.air_quality_sensors_bronze")
+        sensor_ids = [row.id for row in df_sensors.select("id").distinct().collect()]
+        print(f"Found {len(sensor_ids)} sensors to query.")
+    except Exception as e:
+        print("CRITICAL: Could not read sensor table. Run fetch_air_quality_sensors() first.")
+        return
+
     all_measurements = []
 
     for sensor_id in sensor_ids:
         page = 1
         limit = 1000
         while True:
+            # Use the direct sensor endpoint as per documentation
             url = f"https://api.openaq.org/v3/sensors/{sensor_id}/measurements?limit={limit}&page={page}"
+            
             if date_from:
                 url += f"&date_from={date_from}"
             if date_to:
                 url += f"&date_to={date_to}"
 
             headers = {"X-API-Key": OPENAQ_API_KEY}
+            
             try:
                 response = requests.get(url, headers=headers)
                 response.raise_for_status()
                 data = response.json()
-                results = data.get("results", [])
-                if not results:
-                    break
+                
+                # Check if results exist
+                if "results" in data and data["results"]:
+                    results = data["results"]
+                else:
+                    break # Stop if no more data
 
                 for r in results:
-                    all_measurements.append({
-                        "sensor_id": sensor_id,
-                        "location_id": r.get("locationId") or r.get("location_id"),
-                        "parameter": r["parameter"]["name"],
-                        "value": r["value"],
-                        "unit": r["unit"],
-                        "datetime_utc": r["date"]["utc"],
-                        "datetime_local": r["date"]["local"]
-                    })
+                    try:
+                        # Extract dates from the 'period' object as per v3 docs
+                        period = r["period"] if "period" in r else None
+                        dt_from = period["datetimeFrom"] if period and "datetimeFrom" in period else None
+                        
+                        # Extract parameter info
+                        param_info = r["parameter"] if "parameter" in r else None
+                        
+                        # Build measurement dict with safe access
+                        measurement = {
+                            "sensor_id": sensor_id,
+                            "location_id": r["locationId"] if "locationId" in r else None,
+                            "parameter": param_info["name"] if param_info and "name" in param_info else None,
+                            "value": r["value"] if "value" in r else None,
+                            "unit": param_info["units"] if param_info and "units" in param_info else None,
+                            "datetime_utc": dt_from["utc"] if dt_from and "utc" in dt_from else None,
+                            "datetime_local": dt_from["local"] if dt_from and "local" in dt_from else None
+                        }
+                        
+                        all_measurements.append(measurement)
+                    except (KeyError, TypeError) as e:
+                        print(f"⚠ Skipping malformed measurement: {e}")
+                        continue
+                
+                # Simple pagination safety break
+                if len(results) < limit:
+                    break
                 page += 1
+                
             except Exception as e:
                 print(f"⚠ Error fetching measurements for sensor {sensor_id}: {e}")
                 break
 
     if not all_measurements:
-        print("⚠ No measurement data found.")
+        print("⚠ No measurement data found (check Date range).")
         return
 
-    # Create Spark DataFrame
-    df_measurements = spark.createDataFrame(all_measurements, schema=measurements_schema)
+    # 4. Create DataFrame using String schema first
+    df_measurements = spark.createDataFrame(all_measurements, schema=measurements_schema_ingest)
 
-    # Convert datetime strings to timestamps
+    # 5. Convert Strings to Timestamp
     df_measurements = df_measurements \
         .withColumn("datetime_utc", to_timestamp(col("datetime_utc"))) \
         .withColumn("datetime_local", to_timestamp(col("datetime_local")))
 
-    # Idempotent Write (Merge/Upsert)
-    # Deduplicate based on sensor_id AND timestamp
+    # Idempotent Write
     table_name = "bronze.air_quality_measurements_bronze"
     
     if spark.catalog.tableExists(table_name):
@@ -201,8 +266,8 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
             .whenNotMatchedInsertAll()
             .execute()
         )
-        print(f"✔ Merged {len(all_measurements)} measurements into {table_name}")
+        print(f"✔ Merged {len(all_measurements)} measurements.")
     else:
         print(f"Creating new table {table_name}...")
         df_measurements.write.format("delta").saveAsTable(table_name)
-        print(f"✔ Created {table_name} with {len(all_measurements)} measurements")
+        print(f"✔ Created {table_name} with {len(all_measurements)} measurements.")
