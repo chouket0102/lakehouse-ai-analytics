@@ -5,12 +5,10 @@ from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import col, explode, to_timestamp
 from src.data_ingestion.models import *
 
-# Initialize Spark
 spark = SparkSession.builder.getOrCreate()
 
-# Load environment variables / API keys
 location_id = 5886886
-OPENAQ_API_KEY = "bb3f7808b0e6125c0b8e0c8c15980baeb7c19c92f0a956d06e3caa08f7234476"
+OPENAQ_API_KEY = ""
 
 
 # --------------------------
@@ -126,6 +124,6 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
         .withColumn("datetime_utc", to_timestamp(col("datetime_utc"))) \
         .withColumn("datetime_local", to_timestamp(col("datetime_local")))
 
-    # Save as silver table
+    # Save as bronze table
     df_measurements.write.mode("overwrite").format("delta").saveAsTable("bronze.air_quality_measurements_bronze")
     print("✔ Saved air quality measurements into silver.air_quality_measurements_tn")
