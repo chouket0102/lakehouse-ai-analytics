@@ -84,20 +84,12 @@ location_schema = StructType([
 sensor_schema = StructType([
     StructField("id", IntegerType(), True),
     StructField("name", StringType(), True),
-    StructField("locationId", IntegerType(), True),
     StructField("parameter", StructType([
         StructField("id", IntegerType(), True),
         StructField("name", StringType(), True),
         StructField("units", StringType(), True),
         StructField("displayName", StringType(), True)
     ]), True),
-    StructField("coordinates", StructType([
-        StructField("latitude", DoubleType(), True),
-        StructField("longitude", DoubleType(), True)
-    ]), True),
-    StructField("coverage", StringType(), True),
-    StructField("isMobile", BooleanType(), True),
-    StructField("isMonitor", BooleanType(), True),
     StructField("datetimeFirst", StructType([
         StructField("utc", StringType(), True),
         StructField("local", StringType(), True)
@@ -105,6 +97,38 @@ sensor_schema = StructType([
     StructField("datetimeLast", StructType([
         StructField("utc", StringType(), True),
         StructField("local", StringType(), True)
+    ]), True),
+    StructField("coverage", StructType([
+        StructField("expectedCount", IntegerType(), True),
+        StructField("expectedInterval", StringType(), True),
+        StructField("observedCount", IntegerType(), True),
+        StructField("observedInterval", StringType(), True),
+        StructField("percentComplete", DoubleType(), True),
+        StructField("percentCoverage", DoubleType(), True),
+        StructField("datetimeFrom", StructType([
+            StructField("utc", StringType(), True),
+            StructField("local", StringType(), True)
+        ]), True),
+        StructField("datetimeTo", StructType([
+            StructField("utc", StringType(), True),
+            StructField("local", StringType(), True)
+        ]), True)
+    ]), True),
+    StructField("latest", StructType([
+        StructField("datetime", StructType([
+            StructField("utc", StringType(), True),
+            StructField("local", StringType(), True)
+        ]), True),
+        StructField("value", DoubleType(), True),
+        StructField("coordinates", StructType([
+            StructField("latitude", DoubleType(), True),
+            StructField("longitude", DoubleType(), True)
+        ]), True)
+    ]), True),
+    StructField("summary", StructType([
+        StructField("min", DoubleType(), True),
+        StructField("max", DoubleType(), True),
+        StructField("avg", DoubleType(), True)
     ]), True)
 ])
 
