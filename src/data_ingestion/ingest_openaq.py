@@ -8,9 +8,8 @@ from delta.tables import DeltaTable
 
 spark = SparkSession.builder.getOrCreate()
 
-OPENAQ_API_KEY = ""
+OPENAQ_API_KEY = "bb3f7808b0e6125c0b8e0c8c15980baeb7c19c92f0a956d06e3caa08f7234476"
 location_ids=[2162939,2162982,2162940,2162946,2162945,2162942,2162943,2162944,2162947,2162981,2162980,2162989,2162965]
-
 # --------------------------
 # FETCH LOCATIONS AND SAVE IN BRONZE
 # --------------------------
@@ -144,7 +143,7 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
         page = 1
         limit = 1000
         while True:
-            url = f"https://api.openaq.org/v3/measurements?sensor_id={sensor_id}&limit={limit}&page={page}"
+            url = f"https://api.openaq.org/v3/sensors/{sensor_id}/measurements?limit={limit}&page={page}"
             if date_from:
                 url += f"&date_from={date_from}"
             if date_to:

@@ -74,43 +74,30 @@ location_schema = StructType([
         StructField("local", StringType(), True)
     ]), True),
 
-    StructField("datetimeLast", StructType([
-        StructField("utc", StringType(), True),
-        StructField("local", StringType(), True)
-    ]), True)
+    StructField("datetimeLast", StructField("utc", StringType(), True))
 ])
 
 
 sensor_schema = StructType([
     StructField("id", IntegerType(), True),
     StructField("name", StringType(), True),
-
     StructField("locationId", IntegerType(), True),
-
     StructField("parameter", StructType([
         StructField("id", IntegerType(), True),
         StructField("name", StringType(), True),
         StructField("units", StringType(), True),
         StructField("displayName", StringType(), True)
     ]), True),
-
     StructField("coordinates", StructType([
         StructField("latitude", DoubleType(), True),
         StructField("longitude", DoubleType(), True)
     ]), True),
     StructField("coverage", StringType(), True),
-
-    # Other optional fields
     StructField("isMobile", BooleanType(), True),
     StructField("isMonitor", BooleanType(), True),
-    StructField("datetimeFirst", StructType([
-        StructField("utc", StringType(), True),
-        StructField("local", StringType(), True)
-    ]), True),
-    StructField("datetimeLast", StructType([
-        StructField("utc", StringType(), True),
-        StructField("local", StringType(), True)
-    ]), True)
+    StructField("datetimeFirst_utc", TimestampType()),
+    StructField("datetimeLast_utc", TimestampType()),
+
 ])
 
 measurements_schema = StructType([
@@ -119,7 +106,7 @@ measurements_schema = StructType([
     StructField("parameter", StringType(), True),
     StructField("value", DoubleType(), True),
     StructField("unit", StringType(), True),
-    StructField("datetime_utc", TimestampType(), True),
-    StructField("datetime_local", TimestampType(), True)
+    StructField("datetime_utc", StringType(), True),   
+    StructField("datetime_local", StringType(), True)
 ])
 
