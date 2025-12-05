@@ -14,19 +14,14 @@ def fetch_air_quality_sensors():
     df_locations = spark.table(table_name)
 
     sensor_rows = df_locations.select(explode("sensors").alias("sensor")).select("sensor.*").distinct().collect()
-    # Fix: Row objects don't support .get(), use direct attribute access
-    sensor_ids = [r["id"] for r in sensor_rows if r and "id" in r.asDict()]
+    sensor_ids = [r["id"] for r in sensor_rows if r and r["id"]]
 
     all_sensor_rows = []
     for sensor_id in sensor_ids:
         url = f"{BASE_URL}/sensors/{sensor_id}"
         try:
             json_data = safe_get(url)
-            # Replace .get() with direct access
-            if "results" in json_data:
-                results = json_data["results"]
-            else:
-                results = []
+            results = json_data.get("results", [])
             if isinstance(results, dict):
                 results = [results]
             for item in results:
