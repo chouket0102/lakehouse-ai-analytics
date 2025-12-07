@@ -61,21 +61,29 @@ resource "databricks_job" "agent_serving" {
   name = "Air Quality Agent Serving"
 
   task {
-    task_key = "run_agent_server"
+    task_key        = "run_agent_server"
+    environment_key = "Default"
+    max_retries     = 3
 
     spark_python_task {
       python_file = "${var.notebook_path}/src/ai/agent_serving.py"
+      parameters  = ["--openai_api_key", "{{secrets/ai_scope/openai_api_key}}"]
     }
     
-    existing_cluster_id = var.cluster_id
-    
-    # Environment variables for the agent
-    spark_env_vars = {
-      OPENAI_API_KEY = "{{secrets/ai_scope/openai_api_key}}" # Assumes secret exists
-      LOG_LEVEL      = "INFO"
+    # Using Serverless compute (Workspace default/enforced)
+    # Dependencies are installed at runtime via the python script
+  }
+
+  environment {
+    environment_key = "Default"
+    spec {
+      client = "1"
+      dependencies = [
+        "fastapi",
+        "uvicorn",
+        "langchain",
+        "langchain-openai"
+      ]
     }
   }
-  
-  # Retry policy for long running service
-  max_retries = 3
 }
