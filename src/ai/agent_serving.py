@@ -1,7 +1,12 @@
-"""
-AirQuality Agent Deployment and API Serving
-FastAPI app for serving the agent + Databricks Job scheduling hooks
-"""
+try:
+    import fastapi
+    import uvicorn
+    import langchain
+    import langchain_openai
+except ImportError:
+    import subprocess
+    import sys
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "fastapi", "uvicorn", "langchain", "langchain-openai"])
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
@@ -44,7 +49,7 @@ class MonitoringRequest(BaseModel):
 class DailyReportRequest(BaseModel):
     locations: List[str]
 
-# --- Global Agent State ---
+
 agent = None
 
 @app.on_event("startup")
@@ -56,10 +61,8 @@ def startup_event():
         logger.info("Agent initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize agent: {str(e)}")
-        # We don't raise here to allow the app to start, but health check will fail
         pass
 
-# --- API Endpoints ---
 
 @app.get("/health")
 def health_check():
@@ -88,14 +91,7 @@ async def chat(request: ChatRequest):
 
 @app.get("/api/v1/current_conditions")
 async def get_current_conditions(location_name: Optional[str] = None, location_id: Optional[int] = None):
-    # This endpoint bypasses the agent for direct tool access if needed, 
-    # OR we can just use the agent. Let's use the tool logic if accessible, 
-    # but since tools are wrapped in the agent, we might want to just ask the agent 
-    # or expose tools directly. 
-    # For now, we'll keep the FastAPI structure simple and rely on the agent for 'chat',
-    # but if we need direct data, we should use the tools directly.
-    
-    # Import here to avoid circular dependency if tools imports this file (unlikely)
+
     from src.ai.tools import get_current_air_quality
     
     try:
@@ -121,12 +117,6 @@ async def get_current_conditions(location_name: Optional[str] = None, location_i
 @app.post("/api/v1/compare_locations")
 async def compare_locations(request: CompareLocationsRequest):
     from src.ai.tools import compare_city_risk
-    # Note: compare_city_risk in tools.py expects 2 cities as args (city1, city2) 
-    # but the API request has a list.
-    # The tool refactor for `compare_city_risk` wrapper supports 2.
-    # If the user sends more, `compare_locations` in `AirQualityTools` supports list.
-    
-    # We should access the underlying tools instance directly for full flexibility
     from src.ai.tools import _tools_instance, AirQualityTools
     
     tools_instance = _tools_instance or AirQualityTools()
@@ -146,4 +136,12 @@ async def compare_locations(request: CompareLocationsRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("src.ai.agent_serving:app", host="0.0.0.0", port=8000, reload=True)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--openai_api_key", help="OpenAI API Key")
+    args, unknown = parser.parse_known_args()
+    
+    if args.openai_api_key:
+        os.environ["OPENAI_API_KEY"] = args.openai_api_key
+        
+    uvicorn.run("src.ai.agent_serving:app", host="0.0.0.0", port=8000, reload=False)
