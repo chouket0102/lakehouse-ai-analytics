@@ -1,17 +1,19 @@
 from langchain.agents import initialize_agent, AgentType, Tool
-from langchain_community.chat_models import ChatDatabricks
+from langchain_openai import ChatOpenAI
 from src.ai.tools import get_current_air_quality, compare_city_risk
+import os
 
-def create_air_quality_agent(model_endpoint: str = "databricks-dbrx-instruct"):
+def create_air_quality_agent(model_name: str = "gpt-4"):
     """
     Initializes a robust, tool-calling LangChain agent tailored for air quality analysis.
     
     Args:
-        model_endpoint: The Databricks Model Serving Endpoint to use.
+        model_name: The OpenAI model name to use.
     """
-    llm = ChatDatabricks(
-        endpoint=model_endpoint, 
+    llm = ChatOpenAI(
+        model_name=model_name,
         temperature=0.0
+    )
 
     tools = [
         Tool(
@@ -35,7 +37,7 @@ def create_air_quality_agent(model_endpoint: str = "databricks-dbrx-instruct"):
         max_iterations=5 
     )
     
-    # 4. Agent System Prompt (makes the agent more professional)
+    # Agent System Prompt
     agent.agent.llm_chain.prompt.template = """
     You are a professional Air Quality Analyst AI. Your goal is to answer user questions about pollution 
     and health risk by judiciously using the provided tools. Be concise, accurate, and helpful. 
@@ -53,8 +55,7 @@ def create_air_quality_agent(model_endpoint: str = "databricks-dbrx-instruct"):
 
 # Example usage 
 if __name__ == "__main__":
-    # NOTE: This only works if run inside a Databricks Notebook environment with the LLM running.
-    # Replace 'databricks-dbrx-instruct' with your actual endpoint name if needed.
+    # Ensure OPENAI_API_KEY is set in the environment
     agent = create_air_quality_agent()
     
     # Test 1: Tool Call
