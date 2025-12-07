@@ -9,8 +9,6 @@ from pyspark.sql.types import StructType, StructField, IntegerType, StringType, 
 spark = SparkSession.builder.getOrCreate()
 
 def _parse_measurement_result(sensor_id, r):
-    # Replace all .get() with direct access
-    # According to OpenAQ v3 docs, measurements use 'period' not 'date'
     parameter = r["parameter"] if "parameter" in r else {}
     parameter_name = parameter["name"] if isinstance(parameter, dict) and "name" in parameter else None
     parameter_units = parameter["units"] if isinstance(parameter, dict) and "units" in parameter else None
