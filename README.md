@@ -1,12 +1,9 @@
 # 🌍 Lakehouse AI Analytics: Predictive Air Quality Platform
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Active-success">
-  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white">
-  <img src="https://img.shields.io/badge/Terraform-1.0+-7B42BC?style=flat&logo=terraform&logoColor=white">
-  <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat&logo=fastapi&logoColor=white">
-  <img src="https://img.shields.io/badge/Databricks-Lakehouse-FF3621?style=flat&logo=databricks&logoColor=white">
-  <img src="https://img.shields.io/badge/GPT--4o-Agent-10A37F?style=flat&logo=openai&logoColor=white">
+  <img src="https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white">
+  <img src="https://img.shields.io/badge/Databricks-FF3621?style=flat&logo=databricks&logoColor=white">
+  <img src="https://img.shields.io/badge/GPT-10A37F?style=flat&logo=openai&logoColor=white">
 </p>
 
 > **A Next-Generation Intelligence Platform for Real-Time Air Quality Forecasting and Analysis.**
