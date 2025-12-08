@@ -22,7 +22,9 @@ The system features a **Deep Learning (LSTM)** forecasting engine to predict fut
 
 This project implements a robust Data & AI Lakehouse architecture with a clear separation of concerns, managed entirely by **Terraform**.
 
-
+<p align="center">
+  <img src="assets/image.png" alt="Technical Architecture Diagram" width="100%">
+</p>
 
 ### Databricks Medallion & Data Flow
 
