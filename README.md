@@ -1,4 +1,4 @@
-# 🌍 Lakehouse AI Analytics: Predictive Air Quality Platform
+# Lakehouse AI Analytics: Predictive Air Quality Platform ꩜𖦹༄
 
 <p align="center">
   <img src="https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white">
@@ -6,15 +6,12 @@
   <img src="https://img.shields.io/badge/GPT-10A37F?style=flat&logo=openai&logoColor=white">
 </p>
 
-> **A Next-Generation Intelligence Platform for Real-Time Air Quality Forecasting and Analysis.**
-
----
-
 ## 📖 Overview
+
 
 **Lakehouse AI Analytics** is an **end-to-end data and AI platform** designed to ingest, process, and analyze environmental data at scale. By leveraging the **Medallion Architecture** on Databricks, it transforms raw sensor data into actionable insights.
 
-The system features a **Deep Learning (LSTM)** forecasting engine to predict future pollution levels and an autonomous **AI Agent** (powered by OpenAI GPT-4o) that serves real-time health recommendations and complex analytics via a high-performance **FastAPI** interface.
+The system features a **Deep Learning (LSTM)** forecasting engine to predict future pollution levels and an autonomous **AI Agent** that serves real-time health recommendations and complex analytics.
 
 ---
 
@@ -51,7 +48,7 @@ This project implements a robust Data & AI Lakehouse architecture with a clear s
 ### 3. 🤖 Intelligent Agent
 * **Powered by GPT-4o**: Provides **natural language understanding** for complex queries and insights generation.
 * **Tool-Augmented**: The agent utilizes **LangChain** to autonomously query the Lakehouse (via SQL/Spark), run comparisons, and fetch forecasts.
-* **FastAPI Serving**: Modern, **async API** for low-latency, high-performance responses.
+* **FastAPI Serving**: **async API** 
 
 ### 4. ☁️ Infrastructure as Code (IaC)
 * **Terraform Managed**: All cloud and Databricks resources (Jobs, Clusters, Permissions) are defined and managed as code.
