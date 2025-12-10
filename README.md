@@ -17,10 +17,10 @@ The system features a **Deep Learning (LSTM)** forecasting engine to predict fut
 
 ## 🏗️ Technical Architecture
 
-This project implements a robust Data & AI Lakehouse architecture with a clear separation of concerns, managed entirely by **Terraform**.
+This project implements a robust Data & AI Lakehouse architecture managed entirely by **Terraform**.
 
 <p align="center">
-  <img src="assets/image.png" alt="Technical Architecture Diagram" width="100%">
+  <img src="assets/databricks_lakehouse.png" alt="Technical Architecture Diagram" width="100%">
 </p>
 
 ### Databricks Medallion & Data Flow
@@ -30,29 +30,6 @@ This project implements a robust Data & AI Lakehouse architecture with a clear s
 | **🥇 Gold** | **Business-Level Data** | Aggregation, business logic, feature engineering. | Final, optimized Delta Tables for BI & AI. |
 | **🥈 Silver** | **Clean & Validated Data** | Cleansing, de-duplication, schema enforcement, type casting. |Delta Tables, ready for modeling. |
 | **🥉 Bronze** | **Raw Ingestion** | Store data exactly as received from the API. | Delta Tables. |
-
----
-
-## ✨ Key Features
-
-### 1. 🔄 Automated Data Pipeline
-* **Ingestion**: Fetches real-time air quality data from global sensors (OpenAQ).
-* **Processing**: Standardizes data into a **Delta Lake Medallion architecture** (Bronze $\to$ Silver $\to$ Gold).
-* **Quality**: Automated schema validation, data quality checks, and null handling.
-
-### 2. 🧠 Deep Learning Forecasting
-* **LSTM Network**: Uses **Long Short-Term Memory** networks to effectively capture temporal dependencies in pollution time-series data.
-* **24h Forecast**: Predicts maximum Ozone ($O_3$) levels for the next day.
-* **MLflow Integration**: Full **experiment tracking**, model registry, and version control for model lifecycle management.
-
-### 3. 🤖 Intelligent Agent
-* **Powered by GPT-4o**: Provides **natural language understanding** for complex queries and insights generation.
-* **Tool-Augmented**: The agent utilizes **LangChain** to autonomously query the Lakehouse (via SQL/Spark), run comparisons, and fetch forecasts.
-* **FastAPI Serving**: **async API** 
-
-### 4. ☁️ Infrastructure as Code (IaC)
-* **Terraform Managed**: All cloud and Databricks resources (Jobs, Clusters, Permissions) are defined and managed as code.
-* **Reproducible**: Deploy the entire stack into any environment with a single, reliable command.
 
 ---
 
