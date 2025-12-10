@@ -1,4 +1,4 @@
-# Lakehouse AI Analytics: Predictive Air Quality Platform ꩜𖦹༄
+# Lakehouse AI Analytics: Predictive Air Quality Platform 
 
 <p align="center">
   <img src="https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white">
@@ -51,3 +51,10 @@ lakehouse-ai-analytics/
 │   ├── main.tf                    # Job, Cluster, and Permission Definitions
 │   └── variables.tf               # Configuration variables
 └── SETUP_GUIDE.md                 # Deployment Instructions
+```
+
+## 📊 Dashboards & Analytics
+Interactive dashboards provide insights into air quality trends, health risks, and pollution patterns across monitored locations.
+<p align="center">
+  <img src="assets/dashboard.png" alt="Air Quality Dashboard" width="100%">
+</p>
