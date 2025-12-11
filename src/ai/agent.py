@@ -1,8 +1,23 @@
-from langchain.agents import create_react_agent, AgentExecutor, Tool
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from src.ai.tools import get_current_air_quality, compare_city_risk
+"""
+Air Quality Agent using LangChain with version compatibility.
+"""
+from typing import Any, Dict
 import os
+
+# Version-compatible imports
+try:
+    from langchain.agents import Tool, AgentExecutor
+    from langchain_openai import ChatOpenAI
+except ImportError:
+    from langchain.agents import Tool, AgentExecutor
+    from langchain.chat_models import ChatOpenAI
+
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain.agents.conversational_chat.base import ConversationalChatAgent
+
+from src.ai.tools import get_current_air_quality, compare_city_risk
+
 
 def create_air_quality_agent(model_name: str = "gpt-4"):
     """
@@ -32,38 +47,21 @@ def create_air_quality_agent(model_name: str = "gpt-4"):
         )
     ]
 
-    # Create a custom prompt template for the ReAct agent
-    template = """You are a professional Air Quality Analyst AI. Your goal is to answer user questions about pollution 
+    # System message for the agent
+    system_message = """You are a professional Air Quality Analyst AI. Your goal is to answer user questions about pollution 
 and health risk by judiciously using the provided tools. Be concise, accurate, and helpful. 
-Use the tools if a specific city or comparison is requested.
+Use the tools if a specific city or comparison is requested."""
 
-You have access to the following tools:
-
-{tools}
-
-Use the following format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question
-
-Begin!
-
-Question: {input}
-Thought:{agent_scratchpad}"""
-
-    prompt = PromptTemplate.from_template(template)
-    
-    # Create the ReAct agent
-    agent = create_react_agent(llm, tools, prompt)
+    # Create the agent using ConversationalChatAgent which is more stable across versions
+    agent = ConversationalChatAgent.from_llm_and_tools(
+        llm=llm,
+        tools=tools,
+        system_message=system_message,
+        verbose=True
+    )
     
     # Create the AgentExecutor
-    agent_executor = AgentExecutor(
+    agent_executor = AgentExecutor.from_agent_and_tools(
         agent=agent,
         tools=tools,
         verbose=True,
@@ -80,10 +78,10 @@ if __name__ == "__main__":
     
     # Test 1: Tool Call
     print("--- Test 1: Single City Status ---")
-    result = agent_executor.invoke({"input": "What is the air quality risk in Trapani?"})
+    result = agent_executor.run("What is the air quality risk in Trapani?")
     print(result)
     
     # Test 2: Comparison Tool Call
     print("\n--- Test 2: City Comparison ---")
-    result = agent_executor.invoke({"input": "Compare the pollution risk between Trapani and Rome."})
+    result = agent_executor.run("Compare the pollution risk between Trapani and Rome.")
     print(result)
