@@ -79,7 +79,8 @@ async def chat(request: ChatRequest):
     
     try:
         logger.info(f"Chat request: {request.message}")
-        response = agent.run(request.message)
+        result = agent.invoke({"input": request.message})
+        response = result.get("output", str(result))
         
         return {
             "response": response,
