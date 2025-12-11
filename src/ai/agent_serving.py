@@ -3,10 +3,11 @@ try:
     import uvicorn
     import langchain
     import langchain_openai
+    import langchain_core
 except ImportError:
     import subprocess
     import sys
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "fastapi", "uvicorn", "langchain", "langchain-openai"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "fastapi", "uvicorn", "langchain", "langchain-openai", "langchain-core"])
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel

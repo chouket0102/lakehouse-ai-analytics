@@ -6,15 +6,26 @@ import os
 
 # Version-compatible imports
 try:
-    from langchain.agents import Tool, AgentExecutor
+    from langchain_core.tools import Tool
+except ImportError:
+    try:
+        from langchain.tools import Tool
+    except ImportError:
+        from langchain.agents import Tool
+
+try:
+    from langchain.agents import AgentExecutor
     from langchain_openai import ChatOpenAI
 except ImportError:
-    from langchain.agents import Tool, AgentExecutor
+    from langchain.agents import AgentExecutor
     from langchain.chat_models import ChatOpenAI
 
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.agents.conversational_chat.base import ConversationalChatAgent
+try:
+    from langchain.agents.conversational_chat.base import ConversationalChatAgent
+except ImportError:
+    from langchain.agents import ConversationalChatAgent
 
 from src.ai.tools import get_current_air_quality, compare_city_risk
 
