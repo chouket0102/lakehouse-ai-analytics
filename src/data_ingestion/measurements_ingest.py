@@ -46,21 +46,21 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
     df_sensors = spark.table("bronze.air_quality_sensors_bronze")
     sensor_ids = [row.id for row in df_sensors.select("id").collect()]
     
-    print(f"📊 Fetching measurements for {len(sensor_ids)} sensors...")
+    print(f"Fetching measurements for {len(sensor_ids)} sensors...")
     
     # If no date range specified, get last 7 days to avoid overwhelming the API
     if not date_from and not date_to:
         from datetime import datetime, timedelta
         date_to = datetime.now().strftime("%Y-%m-%d")
         date_from = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-        print(f"📅 No date range specified. Using last 7 days: {date_from} to {date_to}")
+        print(f" No date range specified. Using last 7 days: {date_from} to {date_to}")
 
     all_measurements = []
     successful_sensors = 0
     failed_sensors = 0
     
     for idx, sensor_id in enumerate(sensor_ids, 1):
-        print(f"🔄 Processing sensor {idx}/{len(sensor_ids)}: {sensor_id}")
+        print(f"Processing sensor {idx}/{len(sensor_ids)}: {sensor_id}")
         page = 1
         limit = 1000
         sensor_measurement_count = 0
@@ -92,21 +92,21 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
                 page += 1
                 
             except Exception as e:
-                print(f"   ⚠ Error on page {page} for sensor {sensor_id}: {e}")
+                print(f"   Error on page {page} for sensor {sensor_id}: {e}")
                 failed_sensors += 1
                 break
         
         if sensor_measurement_count > 0:
-            print(f"   ✅ Collected {sensor_measurement_count} measurements from sensor {sensor_id}")
+            print(f"    Collected {sensor_measurement_count} measurements from sensor {sensor_id}")
             successful_sensors += 1
         else:
-            print(f"   ⚠ No measurements found for sensor {sensor_id}")
+            print(f"  No measurements found for sensor {sensor_id}")
 
-    print(f"\n📈 Summary: {successful_sensors} sensors succeeded, {failed_sensors} sensors failed")
-    print(f"📊 Total measurements collected: {len(all_measurements)}")
+    print(f"\n Summary: {successful_sensors} sensors succeeded, {failed_sensors} sensors failed")
+    print(f" Total measurements collected: {len(all_measurements)}")
 
     if not all_measurements:
-        print("⚠ No measurement data found.")
+        print(" No measurement data found.")
         return
 
     df_measurements = spark.createDataFrame(all_measurements, schema=measurements_schema)
@@ -128,8 +128,8 @@ def fetch_air_quality_measurements(date_from=None, date_to=None):
             .whenNotMatchedInsertAll()
             .execute()
         )
-        print(f"✔ Merged {len(all_measurements)} measurements into {table_name}")
+        print(f" Merged {len(all_measurements)} measurements into {table_name}")
     else:
         print(f"Creating new table {table_name}...")
         df_measurements.write.format("delta").saveAsTable(table_name)
-        print(f"✔ Created {table_name} with {len(all_measurements)} measurements")
+        print(f"Created {table_name} with {len(all_measurements)} measurements")
