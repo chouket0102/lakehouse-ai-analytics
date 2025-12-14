@@ -3,7 +3,6 @@ from pyspark.sql.types import (
     ArrayType, BooleanType,  DoubleType, TimestampType
 )
 
-#Schema for OpenAQ Locations
 licenses_schema = ArrayType(
     StructType([
         StructField("id", IntegerType(), True),
