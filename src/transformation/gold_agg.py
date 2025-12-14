@@ -29,8 +29,6 @@ def transform_silver_to_gold(spark: SparkSession):
          .when((F.col("max_value") >= 100) & (F.col("max_value") < 180), "High (Unhealthy)")
          .otherwise("Hazardous")
     )
-
-    # 4. Save to Gold
     spark.sql("CREATE SCHEMA IF NOT EXISTS air_quality.gold")
     
     (df_gold.write
