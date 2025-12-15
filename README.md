@@ -37,7 +37,7 @@ This project implements a robust Data & AI Lakehouse architecture managed entire
 
 ```bash
 lakehouse-ai-analytics/
-├── notebooks/                     # Databricks Notebooks
+├── notebooks/          
 │   ├── pipeline_runner.py         # Main ETL orchestrator
 │   └── ml_pollution_forecasting.py # LSTM Training & MLflow
 ├── src/
@@ -46,10 +46,10 @@ lakehouse-ai-analytics/
 │   └── ai/                        # AI Agent Logic
 │       ├── agent.py               # LangChain Agent Definition
 │       ├── agent_serving.py       # FastAPI Application
-│       └── tools.py               # Lakehouse Tools (Spark/SQL)
+│       └── tools.py               # Agent Tools 
 ├── terraform/                     # Infrastructure as Code
-│   ├── main.tf                    # Job, Cluster, and Permission Definitions
-│   └── variables.tf               # Configuration variables
+│   ├── main.tf                 
+│   └── variables.tf               
 └── SETUP_GUIDE.md                 # Deployment Instructions
 ```
 
