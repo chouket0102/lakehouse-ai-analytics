@@ -54,7 +54,7 @@ lakehouse-ai-analytics/
 ```
 
 ## 📊 Dashboards & Analytics
-Interactive dashboards provide insights into air quality trends, health risks, and pollution patterns across monitored locations.
+Interactive dashboards provide insights into air quality trends and pollution patterns across monitored locations.
 <p align="center">
   <img src="assets/dashboard.png" alt="Air Quality Dashboard" width="100%">
 </p>
